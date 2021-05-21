@@ -5,21 +5,13 @@ import { createClient, printGraphQLError, queryAll, queryOnce } from './lib'
 import {
   ArticleNode,
   BlogNode,
-  CollectionNode,
   CommentNode,
-  ProductNode,
-  ProductOptionNode,
-  ProductVariantNode,
   ShopPolicyNode,
-  ProductTypeNode
 } from './nodes'
 import {
   ARTICLES_QUERY,
   BLOGS_QUERY,
-  COLLECTIONS_QUERY,
-  PRODUCTS_QUERY,
   SHOP_POLICIES_QUERY,
-  PRODUCT_TYPES_QUERY
 } from './queries'
 
 export const sourceNodes = async (
@@ -53,20 +45,6 @@ export const sourceNodes = async (
           )
       }),
       createNodes('blogs', BLOGS_QUERY, BlogNode, args),
-      createNodes('collections', COLLECTIONS_QUERY, CollectionNode, args),
-      createNodes('productTypes', PRODUCT_TYPES_QUERY, ProductTypeNode, args),
-      createNodes('products', PRODUCTS_QUERY, ProductNode, args, async x => {
-        if (x.variants)
-          await forEach(x.variants.edges, async edge =>
-            createNode(await ProductVariantNode(imageArgs)(edge.node)),
-          )
-
-        if (x.options)
-          await forEach(x.options, async option =>
-            createNode(await ProductOptionNode(imageArgs)(option)),
-          )
-      }),
-      createShopPolicies(args),
     ])
     console.timeEnd(msg)
   } catch (e) {
